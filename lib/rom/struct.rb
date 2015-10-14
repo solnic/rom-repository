@@ -28,5 +28,12 @@ module ROM
     def [](name)
       instance_variable_get("@#{name}")
     end
+
+    # Delegate unknown methods to the Coerced hash
+    #
+    # @api public
+    def method_missing(method, *args, &block)
+      to_h.send(method, *args, &block)
+    end
   end
 end
