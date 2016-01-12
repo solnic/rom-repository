@@ -25,4 +25,16 @@ RSpec.describe ROM::Repository::Model do
       expect(user_struct.name).to eql('Jane Doe')
     end
   end
+
+  describe '#delete' do
+    it 'deletes existing tuple from a relation' do
+      user_tuple = repo.create(name: 'Jane')
+
+      repo.delete(user_tuple[:id])
+
+      user_struct = repo.users.where(id: user_tuple[:id]).first
+
+      expect(user_struct).to be(nil)
+    end
+  end
 end

@@ -10,10 +10,13 @@ module ROM
 
       attr_reader :update_command
 
+      attr_reader :delete_command
+
       def initialize(rom)
         super
         @create_command = Commands::Create[adapter].build(relation, result: :one)
         @update_command = Commands::Update[adapter].build(relation, result: :one)
+        @delete_command = Commands::Delete[adapter].build(relation, result: :one)
       end
 
       def create(attributes)
@@ -24,6 +27,12 @@ module ROM
         update_command
           .new(relation.where(relation.primary_key => pk))
           .call(attributes)
+      end
+
+      def delete(pk)
+        delete_command
+          .new(relation.where(relation.primary_key => pk))
+          .call
       end
 
       private
