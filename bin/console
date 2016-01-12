@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require 'pry'
+require 'rom-repository'
+require 'rom/repository/model'
+
+def rom
+  @rom ||= ROM.container(:sql, db_url) do |config|
+    config.use(:macros)
+    config.relation(:users)
+  end
+end
+
+def db_url
+  ENV.fetch('DATABASE_URL', 'postgres://localhost/rom_repository')
+end
+
+Pry.start
