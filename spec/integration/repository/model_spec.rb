@@ -5,6 +5,10 @@ RSpec.describe ROM::Repository::Model do
 
   include_context 'database'
 
+  before do
+    configuration.relation(:users)
+  end
+
   describe '#create' do
     it 'inserts tuple into relation' do
       user_tuple = repo.create(name: 'Jane')
