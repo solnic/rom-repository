@@ -11,13 +11,13 @@ module ROM
 
       def self.[](*args)
         cache.fetch_or_store(args.hash) do
-          container, type, adapter, ast = args
+          container, type, adapter, ast, block = args
 
           unless SUPPORTED_TYPES.include?(type)
             raise ArgumentError, "#{type.inspect} is not a supported command type"
           end
 
-          graph_opts = new(type, adapter, container, registry).visit(ast)
+          graph_opts = new(type, adapter, container, registry, block).visit(ast)
 
           command = ROM::Commands::Graph.build(registry, graph_opts)
 
@@ -37,12 +37,13 @@ module ROM
         @__registry__ ||= Hash.new { |h, k| h[k] = {} }
       end
 
-      attr_reader :type, :adapter, :container, :registry
+      attr_reader :type, :adapter, :container, :registry, :block
 
-      def initialize(type, adapter, container, registry)
+      def initialize(type, adapter, container, registry, block)
         @type = Commands.const_get(Inflector.classify(type))[adapter]
         @registry = registry
         @container = container
+        @block = block
       end
 
       def visit(ast)
@@ -99,6 +100,8 @@ module ROM
         end
 
         result = meta.fetch(:combine_type, :one)
+
+        klass.instance_exec(&block) if block
 
         registry[name][type] = klass.build(relation, result: result)
       end
