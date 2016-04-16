@@ -80,36 +80,43 @@ module ROM
     # @api public
     def self.commands(*names, **opts)
       if names.any?
-        @commands = names + opts.to_a
-
-        @commands.each do |spec|
-          type, *view = Array(spec).flatten
-
-          if view.size > 0
-            define_restricted_command_method(type, view)
-          else
-            define_command_method(type)
-          end
-        end
+        (names + opts.to_a).each { |spec| command(spec) }
       else
         @commands || []
       end
     end
 
-    def self.define_command_method(type)
-      define_method(type) do |*args|
-        command(type => self.class.root).call(*args)
+    # @api public
+    def self.command(name, &block)
+      type, *view = Array(name).flatten
+
+      if view.size > 0
+        define_restricted_command_method(type, view, &block)
+      else
+        define_command_method(type, &block)
+      end
+
+      if @commands
+        @commands = @commands + [name]
+      else
+        @commands = [name]
       end
     end
 
-    def self.define_restricted_command_method(type, views)
+    def self.define_command_method(type, &block)
+      define_method(type) do |*args|
+        command(type => self.class.root, &block).call(*args)
+      end
+    end
+
+    def self.define_restricted_command_method(type, views, &block)
       views.each do |view_name|
         meth_name = views.size > 1 ? :"#{type}_#{view_name}" : type
 
         define_method(meth_name) do |*args|
           view_args, *input = args
 
-          command(type => self.class.root)
+          command(type => self.class.root, &block)
             .public_send(view_name, *view_args)
             .call(*input)
         end
@@ -156,7 +163,7 @@ module ROM
           ast = relation.to_ast
           adapter = relations[relation.name].adapter
 
-          CommandCompiler[container, type, adapter, ast] >> mappers[ast]
+          CommandCompiler[container, type, adapter, ast, block] >> mappers[ast]
         end
       else
         container.command(*args, &block)
