@@ -33,5 +33,17 @@ RSpec.shared_context 'relations' do
     end
 
     configuration.relation(:tags)
+
+    configuration.relation(:accounts) do
+      dataset :user_accounts
+
+      def name
+        :accounts
+      end
+
+      def for_users(users)
+        where(owner_id: users.map { |u| u[:id] })
+      end
+    end
   end
 end

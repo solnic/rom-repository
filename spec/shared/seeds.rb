@@ -7,5 +7,7 @@ RSpec.shared_context 'seeds' do
     task_id = conn[:tasks].insert user_id: jane_id, title: 'Jane Task'
 
     conn[:tags].insert task_id: task_id, name: 'red'
+
+    conn[:user_accounts].insert owner_id: jane_id, account_no: 'A-645'
   end
 end

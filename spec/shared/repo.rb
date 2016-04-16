@@ -6,7 +6,7 @@ RSpec.shared_context('repo') do
 
   let(:repo_class) do
     Class.new(ROM::Repository[:users]) do
-      relations :tasks, :tags
+      relations :tasks, :tags, accounts: { owner_id: :id }
 
       def find_users(criteria)
         users.find(criteria)
@@ -54,6 +54,14 @@ RSpec.shared_context('repo') do
 
       def tag_with_wrapped_task
         tags.wrap_parent(task: tasks)
+      end
+
+      def users_with_accounts
+        aggregate(many: { all_accounts: accounts.for_users })
+      end
+
+      def accounts_for_users(users)
+        accounts.for_users(users)
       end
     end
   end

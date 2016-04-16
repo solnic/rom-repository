@@ -53,13 +53,13 @@ module ROM
             h[type] =
               if parents.is_a?(Hash)
                 parents.each_with_object({}) { |(key, parent), r|
-                  r[key] = [parent, combine_keys(parent, :parent)]
+                  r[key] = [parent, combine_keys(parent)]
                 }
               else
                 (parents.is_a?(Array) ? parents : [parents])
                   .each_with_object({}) { |parent, r|
                   r[parent.combine_tuple_key(type)] = [
-                    parent, combine_keys(parent, :parent)
+                    parent, combine_keys(parent)
                   ]
                 }
               end
@@ -81,33 +81,28 @@ module ROM
             h[type] =
               if children.is_a?(Hash)
                 children.each_with_object({}) { |(key, child), r|
-                  r[key] = [child, combine_keys(relation, :children)]
+                  r[key] = [child, child.meta.fetch(:keys) { combine_keys(relation) }.invert]
                 }
               else
                 (children.is_a?(Array) ? children : [children])
                   .each_with_object({}) { |child, r|
                   r[child.combine_tuple_key(type)] = [
-                    child, combine_keys(relation, :children)
+                    child, child.meta.fetch(:keys) { combine_keys(relation) }.invert
                   ]
                 }
               end
           })
         end
 
-        # Infer join keys for a given relation and association type
+        # Infer join keys for a given relation
         #
         # @param [RelationProxy] relation
-        # @param [Symbol] type The type can be either :parent or :children
         #
         # @return [Hash<Symbol=>Symbol>]
         #
         # @api private
-        def combine_keys(relation, type)
-          if type == :parent
-            { relation.foreign_key => relation.primary_key }
-          else
-            { relation.primary_key => relation.foreign_key }
-          end
+        def combine_keys(relation)
+          { relation.foreign_key => relation.primary_key }
         end
 
         # Infer relation for combine operation
