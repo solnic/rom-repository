@@ -61,14 +61,22 @@ module ROM
     # @return [Array<Symbol>]
     #
     # @api public
-    def self.relations(*names)
+    def self.relations(*names, **opts)
       if names.any?
-        attr_reader(*names)
+        relations = (names + opts.to_a).map do |spec|
+          if spec.is_a?(Array)
+            [spec[0], meta: { keys: spec[1] }]
+          else
+            spec
+          end
+        end
+
+        attr_reader *relations.map { |r| r.is_a?(Array) ? r.first : r }
 
         if defined?(@relations)
-          @relations.concat(names).uniq!
+          @relations.concat(relations).uniq!
         else
-          @relations = names
+          @relations = relations
         end
 
         @relations
@@ -121,10 +129,10 @@ module ROM
       @container = container
       @mappers = MapperBuilder.new
 
-      @relations = self.class.relations.each_with_object({}) do |name, hash|
+      @relations = self.class.relations.each_with_object({}) do |(name, options), hash|
         relation = container.relation(name)
 
-        proxy = RelationProxy.new(relation, name: name, mappers: mappers)
+        proxy = RelationProxy.new(relation, name: name, mappers: mappers, **(options || {}))
 
         instance_variable_set("@#{name}", proxy)
 

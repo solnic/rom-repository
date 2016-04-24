@@ -48,4 +48,12 @@ RSpec.describe 'ROM repository' do
   it 'loads a wrapped relation' do
     expect(repo.tag_with_wrapped_task.first).to eql(tag_with_task)
   end
+
+  it 'loads a relation by an association with custom keys' do
+    expect(repo.accounts_for_users(repo.all_users)).to match_array([jane_account])
+  end
+
+  it 'loads a combine relation with many children and custom keys' do
+    expect(repo.users_with_accounts.to_a).to match_array([jane_with_accounts, joe_without_accounts])
+  end
 end
