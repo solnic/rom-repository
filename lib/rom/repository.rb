@@ -148,12 +148,11 @@ module ROM
     # @return [ROM::Command]
     #
     # @api public
-    def command(*args, **opts, &block)
+    def command(*args, mapper: nil, **opts, &block)
       all_args = args + opts.to_a.flatten
 
       if all_args.size > 1
         commands.fetch_or_store(all_args.hash) do
-          custom_mapper = opts.delete(:mapper)
           type, name = args + opts.to_a.flatten
 
           relation = name.is_a?(Symbol) ? relations[name] : name
@@ -161,13 +160,13 @@ module ROM
           ast = relation.to_ast
           adapter = relations[relation.name].adapter
 
-          if custom_mapper
-            mapper = container.mappers[relation.name][custom_mapper]
+          if mapper
+            use_mapper = container.mappers[relation.name][mapper]
           else
-            mapper = mappers[ast]
+            use_mapper = mappers[ast]
           end
 
-          CommandCompiler[container, type, adapter, ast] >> mapper
+          CommandCompiler[container, type, adapter, ast] >> use_mapper
         end
       else
         container.command(*args, &block)
