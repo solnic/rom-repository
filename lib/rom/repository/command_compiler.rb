@@ -99,7 +99,7 @@ module ROM
 
           plugins.each { |plugin| klass.use(plugin) }
 
-          registry[name][type] = klass.build(relation, result: result)
+          registry[name][type] = klass.build(relation, result: result, input: Hash)
         end
       end
     end
