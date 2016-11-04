@@ -85,6 +85,10 @@ RSpec.shared_context 'structs' do
     user_with_tasks_struct.new(id: 1, name: 'Jane', all_tasks: [task_with_tag])
   end
 
+  let(:user_with_tasks_and_their_tags) do
+    user_with_tasks_struct.new(id: 1, name: 'Jane', all_tasks: [task_with_tag])
+  end
+
   let(:joe) do
     user_struct.new(id: 2, name: 'Joe')
   end

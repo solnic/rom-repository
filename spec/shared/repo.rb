@@ -36,6 +36,10 @@ RSpec.shared_context('repo') do
         aggregate(one: tasks.find(title: title))
       end
 
+      def users_with_tasks_and_their_tags
+        combine(tasks: [:tags])
+      end
+
       def tasks_for_users(users)
         tasks.for_users(users)
       end
