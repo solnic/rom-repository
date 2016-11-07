@@ -58,7 +58,7 @@ module ROM
 
           options.each do |key, value|
             if key == :one || key == :many
-              combine_opts[key] = combine_opts_from_relations(value)
+              combine_opts[key].merge!(combine_opts_from_relations(value))
             else
               result, curried, keys = combine_opts_for_assoc(key, value)
               combine_opts[result][key] = [curried, keys]
