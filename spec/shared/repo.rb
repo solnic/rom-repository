@@ -44,6 +44,10 @@ RSpec.shared_context('repo') do
         posts.combine_children(many: labels)
       end
 
+      def label_with_posts
+        labels.combine_children(one: posts)
+      end
+
       def tasks_for_users(users)
         tasks.for_users(users)
       end

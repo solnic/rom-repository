@@ -25,8 +25,8 @@ RSpec.shared_context 'structs' do
     mapper_for(repo.posts_with_labels).model
   end
 
-  let(:label_with_post_struct) do
-    mapper_for(repo.label_with_post).model
+  let(:label_with_posts_struct) do
+    mapper_for(repo.label_with_posts).model
   end
 
   let(:tag_with_task_struct) do
@@ -126,11 +126,11 @@ RSpec.shared_context 'structs' do
   end
 
   let(:label_red) do
-    label_struct.new(id: 1, name: 'red') # , post_id: 1)
+    label_with_posts_struct.new(id: 1, name: 'red', post: 1)
   end
 
   let(:label_blue) do
-    label_struct.new(id: 3, name: 'blue') # , post_id: 1)
+    label_with_posts_struct.new(id: 3, name: 'blue', post: 1)
   end
 
   let(:post_with_label) do
