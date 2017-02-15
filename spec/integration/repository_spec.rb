@@ -32,6 +32,11 @@ RSpec.describe 'ROM repository' do
     expect(repo.task_with_owner.first).to eql(task_with_owner)
   end
 
+  it 'returns struct object for first and last methods' do
+    expect(repo.task_with_user.first).to be_a ROM::Struct
+    expect(repo.task_with_user.last).to be_a ROM::Struct
+  end
+
   it 'loads a combined relation with many children' do
     expect(repo.users_with_tasks.to_a).to match_array([jane_with_tasks, joe_with_tasks])
   end
