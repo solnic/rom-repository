@@ -11,11 +11,10 @@ module ROM
 
       def initialize(command)
         @command = command
-        @root = Dry::Core::Inflector.singularize(command.name.relation).to_sym
       end
 
       def call(input)
-        command.call(root => input)
+        command.call(command.name.relation => input)
       end
 
       def >>(other)
