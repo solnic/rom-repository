@@ -338,7 +338,7 @@ RSpec.describe 'ROM repository' do
   end
 
   it 'loads structs using plain SQL' do
-    jane = repo.users.read("SELECT name FROM users WHERE name = 'Jane'").one
+    jane = repo.users.read("SELECT id, name FROM users WHERE name = 'Jane'").one
 
     expect(jane.name).to eql('Jane')
   end
