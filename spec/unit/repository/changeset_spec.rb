@@ -174,6 +174,22 @@ RSpec.describe ROM::Repository, '#changeset' do
         expect(changeset.commit).to eql(id: 1, name: 'Jade Doe')
       end
     end
+
+    context 'with a dependency' do
+      let(:changeset) do
+        repo.changeset(changeset_class[:users], dep: "foo").data({})
+      end
+
+      let(:changeset_class) do
+        Class.new(ROM::Changeset::Create) do
+          option :dep, reader: true
+        end
+      end
+
+      it 'has the dependency as attribute' do
+        expect(changeset.dep).to eql('foo')
+      end
+    end
   end
 
   it 'raises ArgumentError when unknown type was used' do

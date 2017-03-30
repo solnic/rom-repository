@@ -18,7 +18,7 @@ module ROM
       # @!attribute [r] pipe
       #   @return [Changeset::Pipe] data transformation pipe
       #   @api private
-      option :pipe, accept: [Proc, Pipe], default: -> { self.class.default_pipe(self) }
+      option :pipe, accept: [Proc, Pipe], default: -> { nil }
 
       # Define a changeset mapping
       #
@@ -82,6 +82,12 @@ module ROM
       # @api private
       def self.pipes
         @__pipes__
+      end
+
+      # Initialize default pipe with self after self itself was initialized
+      def initialize(*args)
+        super
+        @pipe ||= self.class.default_pipe(self)
       end
 
       # Pipe changeset's data using custom steps define on the pipe

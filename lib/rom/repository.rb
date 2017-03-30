@@ -227,22 +227,21 @@ module ROM
     def changeset(*args)
       opts = { command_compiler: command_compiler }
 
-      if args.size == 2
+      if args[0].is_a?(Class) && args.size <= 3
+        klass = args[0]
+        opts = opts.merge(args[1]) if args[1].respond_to?(:to_hash)
+
+        if klass < Changeset
+          return klass.new(relations[klass.relation], opts)
+        else
+          raise ArgumentError, "+#{klass.name}+ is not a Changeset subclass"
+        end
+      elsif args.size == 2
         name, data = args
       elsif args.size == 3
         name, pk, data = args
       elsif args.size == 1
-        if args[0].is_a?(Class)
-          klass = args[0]
-
-          if klass < Changeset
-            return klass.new(relations[klass.relation], opts)
-          else
-            raise ArgumentError, "+#{klass.name}+ is not a Changeset subclass"
-          end
-        else
-          type, relation = args[0].to_a[0]
-        end
+        type, relation = args[0].to_a[0]
       else
         raise ArgumentError, 'Repository#changeset accepts 1-3 arguments'
       end

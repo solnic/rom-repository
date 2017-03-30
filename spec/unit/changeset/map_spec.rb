@@ -81,4 +81,33 @@ RSpec.describe ROM::Changeset, '.map' do
       expect(klass.pipes).to eql(changeset.class.pipes)
     end
   end
+
+  context 'injecting dependencies to custom blocks' do
+    let(:relation) { double(:relation) }
+    let(:user_data) { { name: 'Jane' } }
+
+    it 'works after initialization with optional dependencies' do
+      changeset = Class.new(ROM::Changeset::Create[:users]) do
+        option :dep, reader: true, optional: true
+
+        map do |tuple|
+          tuple.merge(dep: dep)
+        end
+      end.new(relation).with(dep: "foo").data(user_data)
+
+      expect(changeset.to_h).to eql(name: 'Jane', dep: 'foo')
+    end
+
+    it 'works on initialization' do
+      changeset = Class.new(ROM::Changeset::Create[:users]) do
+        option :dep, reader: true
+
+        map do |tuple|
+          tuple.merge(dep: dep)
+        end
+      end.new(relation, dep: "foo").data(user_data)
+
+      expect(changeset.to_h).to eql(name: 'Jane', dep: 'foo')
+    end
+  end
 end
