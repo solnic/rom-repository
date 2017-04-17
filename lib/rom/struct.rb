@@ -75,5 +75,12 @@ module ROM
 
       raise NoMethodError.new("undefined method `#{ m }' for #{ name }", m, args).tap { |e| e.set_backtrace(trace) }
     end
+
+    # Delegate unknown methods to the Coerced hash
+    #
+    # @api public
+    def method_missing(method, *args, &block)
+      to_h.send(method, *args, &block)
+    end
   end
 end
