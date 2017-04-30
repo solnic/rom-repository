@@ -32,6 +32,14 @@ RSpec.describe ROM::Changeset do
 
       expect(changeset.diff).to eql(name: "Jane Doe")
     end
+
+    it 'does not consider keys that are not present on the original tuple' do
+      expect(relation).to receive(:one).and_return(jane)
+
+      changeset = ROM::Changeset::Update.new(relation, __data__: { foo: "bar" })
+
+      expect(changeset.diff).to eql({})
+    end
   end
 
   describe '#diff?' do
@@ -47,6 +55,14 @@ RSpec.describe ROM::Changeset do
       expect(relation).to receive(:one).and_return(jane)
 
       changeset = ROM::Changeset::Update.new(relation, __data__: { name: "Jane" })
+
+      expect(changeset).to_not be_diff
+    end
+
+    it 'returns false when data contains keys that are not available on the original tuple' do
+      expect(relation).to receive(:one).and_return(jane)
+
+      changeset = ROM::Changeset::Update.new(relation, __data__: { foo: "bar" })
 
       expect(changeset).to_not be_diff
     end

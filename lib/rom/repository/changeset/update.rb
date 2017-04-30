@@ -81,6 +81,7 @@ module ROM
             ori_tuple = original.to_a
 
             Hash[new_tuple - (new_tuple & ori_tuple)]
+              .slice(*original.keys)
           end
       end
     end
