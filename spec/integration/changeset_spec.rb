@@ -2,12 +2,40 @@ RSpec.describe 'Using changesets' do
   include_context 'database'
   include_context 'relations'
 
+  before do
+    module Test
+      class User < Dry::Struct
+        attribute :id, Dry::Types['strict.int']
+        attribute :name, Dry::Types['strict.string']
+      end
+    end
+
+    configuration.mappers do
+      define(:users) do
+        model Test::User
+        register_as :user
+      end
+    end
+  end
+
   describe 'Create' do
     subject(:repo) do
       Class.new(ROM::Repository[:users]) {
         relations :books, :posts
         commands :create, update: :by_pk
       }.new(rom)
+    end
+
+    let(:create_changeset) do
+      Class.new(ROM::Changeset::Create)
+    end
+
+    let(:add_book_changeset) do
+      Class.new(ROM::Changeset::Create[:books])
+    end
+
+    let(:update_changeset) do
+      Class.new(ROM::Changeset::Update)
     end
 
     it 'can be passed to a command' do
@@ -69,6 +97,28 @@ RSpec.describe 'Using changesets' do
       expect(result.title).to eql("rom-rb is awesome")
       expect(result.created_at).to be_instance_of(Time)
       expect(result.updated_at).to be_instance_of(Time)
+    end
+
+    it 'preserves relation mappers with create' do
+      changeset = repo.
+                    changeset(create_changeset).
+                    new(repo.users.relation.as(:user)).
+                    data(name: 'Joe Dane')
+
+      expect(changeset.commit).to eql(Test::User.new(id: 1, name: 'Joe Dane'))
+    end
+
+    it 'creates changesets for non-root relations' do
+      repo.create(name: 'John Doe')
+      changeset = repo.changeset(add_book_changeset).data(title: 'The War of the Worlds')
+
+      expect(changeset.commit).
+        to include(
+             id: 1,
+             title: 'The War of the Worlds',
+             created_at: nil,
+             updated_at: nil
+           )
     end
   end
 
