@@ -114,44 +114,45 @@ module ROM
         name, meta, header = node
         other = visit(header, name)
 
-        if type
+        if container.commands.key?(name) && container.commands[name][id]
+          # the container already contains this command so use it
+          registry[name][id] = container.commands[name][id]
+        elsif type
+          # compile a default command
           register_command(name, type, meta, parent_relation)
+        end
 
-          default_mapping =
-            if meta[:combine_type] == :many
-              name
-            else meta[:combine_type] == :one
-              { Dry::Core::Inflector.singularize(name).to_sym => name }
-            end
+        default_mapping =
+          if meta[:combine_type] == :one
+            { Dry::Core::Inflector.singularize(name).to_sym => name }
+          else
+            name
+          end
 
-          mapping =
-            if parent_relation
-              associations = container.relations[parent_relation].associations
+        mapping =
+          if parent_relation
+            associations = container.relations[parent_relation].associations
 
-              assoc =
-                if associations.key?(meta[:combine_name])
-                  associations[meta[:combine_name]]
-                elsif associations.key?(name)
-                  associations[name]
-                end
-
-              if assoc
-                { assoc.target.key => assoc.target.dataset }
-              else
-                default_mapping
+            assoc =
+              if associations.key?(meta[:combine_name])
+                associations[meta[:combine_name]]
+              elsif associations.key?(name)
+                associations[name]
               end
+
+            if assoc
+              { assoc.target.key => assoc.target.dataset }
             else
               default_mapping
             end
-
-          if other.size > 0
-            [mapping, [type, other]]
           else
-            [mapping, type]
+            default_mapping
           end
+
+        if other.size > 0
+          [mapping, [id, other]]
         else
-          registry[name][id] = container.commands[name][id]
-          [name, id]
+          [mapping, id]
         end
       end
 
@@ -191,7 +192,7 @@ module ROM
 
           finalize_command_class(klass, relation)
 
-          registry[rel_name][type] = klass.build(relation, input: relation.input_schema)
+          registry[rel_name][type.default_name] = klass.build(relation, input: relation.input_schema)
         end
       end
 

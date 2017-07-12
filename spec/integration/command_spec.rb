@@ -5,9 +5,11 @@ RSpec.describe ROM::Repository, '#command' do
 
   context 'accessing custom command from the registry' do
     before do
+      CustomCommand = Class.new(ROM::Commands::Create)
+
       configuration.commands(:users) do
         define(:upsert, type: ROM::SQL::Commands::Create)
-        define(:create)
+        define(:create, type: CustomCommand)
       end
 
       configuration.commands(:tasks) do
@@ -15,9 +17,19 @@ RSpec.describe ROM::Repository, '#command' do
       end
     end
 
+    after do
+      Object.send(:remove_const, :CustomCommand)
+    end
+
     it 'returns registered command' do
       expect(repo.command(:users).upsert).to be(rom.command(:users).upsert)
       expect(repo.command(:users)[:upsert]).to be(rom.command(:users).upsert)
+    end
+
+    it 'returns custom command' do
+      expect(repo.command(:users).create).to be(rom.command(:users).create)
+      expect(repo.command(:users).create).to be_a(CustomCommand)
+      expect(rom.command(:users).create).to be_a(CustomCommand)
     end
 
     it 'exposes command builder DSL' do
